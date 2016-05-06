@@ -1,0 +1,68 @@
+apply plugin: 'com.android.application'
+
+
+
+
+def getMyVersionCode = { ->
+    try {
+        /*   def code = new ByteArrayOutputStream()
+         exec {
+              commandLine 'git', 'tag', '--list'
+              standardOutput = code
+          }
+          return code.toString().split("\n").size()*/
+
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'describe', '--tags', '--long'
+            standardOutput = stdout
+        }
+        def temVersionName = stdout.toString().trim().split("v")[1]
+        return Integer.parseInt(temVersionName)
+    }
+    catch (ignored) {
+        return 1;
+    }
+}
+
+def getMyVersionName = { ->
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'describe', '--tags', '--long'
+            standardOutput = stdout
+        }
+        def temVersionName = stdout.toString().trim().split("v")[1]
+        return temVersionName.toString().trim().split("-")[0] + "." + temVersionName.toString().trim().split("-")[1]
+    }
+    catch (ignored) {
+        return "1.0";
+    }
+}
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        applicationId "com.promact.demogittag"
+        minSdkVersion 16
+        targetSdkVersion 23
+        versionCode getMyVersionCode()
+        versionName getMyVersionName()
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+}
+
